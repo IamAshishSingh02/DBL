@@ -1,0 +1,94 @@
+mysql> INSERT INTO emp(name, sal, eno, doj) VALUES('Bikash', 70000, 6, '2025-07-01');
+Query OK, 1 row affected (0.08 sec)
+
+mysql> SELECT * FROM emp;
++------+----------+-------+------------+
+| eno  | name     | sal   | doj        |
++------+----------+-------+------------+
+|    1 | Ashish   | 70000 | 2025-07-01 |
+|    2 | Abhay    | 70000 | 2025-07-01 |
+|    3 | Anish    | 70000 | 2025-07-01 |
+|    4 | Ashutosh |  NULL | NULL       |
+|    5 | Bikash   | 70000 | 2025-07-01 |
+|    6 | Bikash   | 70000 | 2025-07-01 |
++------+----------+-------+------------+
+6 rows in set (0.00 sec)
+
+mysql> SELECT eno, name FROM emp;
++------+----------+
+| eno  | name     |
++------+----------+
+|    1 | Ashish   |
+|    2 | Abhay    |
+|    3 | Anish    |
+|    4 | Ashutosh |
+|    5 | Bikash   |
+|    6 | Bikash   |
++------+----------+
+6 rows in set (0.00 sec)
+
+mysql> SELECT DISTINCT FROM emp;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FROM emp' at line 1
+mysql> SELECT DISTINCT * FROM emp;
++------+----------+-------+------------+
+| eno  | name     | sal   | doj        |
++------+----------+-------+------------+
+|    1 | Ashish   | 70000 | 2025-07-01 |
+|    2 | Abhay    | 70000 | 2025-07-01 |
+|    3 | Anish    | 70000 | 2025-07-01 |
+|    4 | Ashutosh |  NULL | NULL       |
+|    5 | Bikash   | 70000 | 2025-07-01 |
+|    6 | Bikash   | 70000 | 2025-07-01 |
++------+----------+-------+------------+
+6 rows in set (0.00 sec)
+
+mysql> SELECT DISTINCT * FROM emp WHERE name='Bikash';
++------+--------+-------+------------+
+| eno  | name   | sal   | doj        |
++------+--------+-------+------------+
+|    5 | Bikash | 70000 | 2025-07-01 |
+|    6 | Bikash | 70000 | 2025-07-01 |
++------+--------+-------+------------+
+2 rows in set (0.00 sec)
+
+mysql> DELETE FROM new_emp;
+Query OK, 5 rows affected (0.06 sec)
+
+mysql> SELECT * FROM new_emp;
+Empty set (0.00 sec)
+
+mysql> DESC new_emp;
++-------+-------------+------+-----+---------+-------+
+| Field | Type        | Null | Key | Default | Extra |
++-------+-------------+------+-----+---------+-------+
+| eno   | int         | YES  |     | NULL    |       |
+| ename | varchar(20) | YES  |     | NULL    |       |
++-------+-------------+------+-----+---------+-------+
+2 rows in set (0.00 sec)
+
+mysql> DROP new_emp;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'new_emp' at line 1
+mysql> DROP TABLE new_emp;
+Query OK, 0 rows affected (0.42 sec)
+
+mysql> DESC new_emp;
+ERROR 1146 (42S02): Table 'demo.new_emp' doesn't exist
+mysql> UPDATE emp SET name = 'Ram' WHERE eno = 6;
+Query OK, 1 row affected (0.09 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> SELECT * FROM emp;
++------+----------+-------+------------+
+| eno  | name     | sal   | doj        |
++------+----------+-------+------------+
+|    1 | Ashish   | 70000 | 2025-07-01 |
+|    2 | Abhay    | 70000 | 2025-07-01 |
+|    3 | Anish    | 70000 | 2025-07-01 |
+|    4 | Ashutosh |  NULL | NULL       |
+|    5 | Bikash   | 70000 | 2025-07-01 |
+|    6 | Ram      | 70000 | 2025-07-01 |
++------+----------+-------+------------+
+6 rows in set (0.00 sec)
+
+mysql> UPDATE emp SET name EQUAL to 'Ram' WHERE eno = 6;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'EQUAL to 'Ram' WHERE eno = 6' at line 1
