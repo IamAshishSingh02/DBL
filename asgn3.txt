@@ -1,0 +1,311 @@
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| Bank               |
+| Bank_New           |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+6 rows in set (0.00 sec)
+
+mysql> use Bank_New;
+Database changed
+mysql> CREATE TABLE Branch (
+    ->     branch_name VARCHAR(255) PRIMARY KEY,
+    ->     branch_city VARCHAR(255),
+    ->     assets DECIMAL(12, 2)
+    -> );
+Query OK, 0 rows affected (0.09 sec)
+
+mysql> 
+mysql> CREATE TABLE Customer (
+    ->     customer_id VARCHAR(10) PRIMARY KEY,
+    ->     customer_name VARCHAR(255) NOT NULL,
+    ->     customer_street VARCHAR(255),
+    ->     customer_city VARCHAR(255)
+    -> );
+Query OK, 0 rows affected (0.09 sec)
+
+mysql> 
+mysql> CREATE TABLE Account (
+    ->     account_number VARCHAR(10) PRIMARY KEY,
+    ->     branch_name VARCHAR(255),
+    ->     balance DECIMAL(10, 2),
+    ->     FOREIGN KEY (branch_name) REFERENCES Branch(branch_name)
+    -> );
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> 
+mysql> CREATE TABLE Loan (
+    ->     loan_number VARCHAR(10) PRIMARY KEY,
+    ->     branch_name VARCHAR(255),
+    ->     amount DECIMAL(10, 2),
+    ->     FOREIGN KEY (branch_name) REFERENCES Branch(branch_name)
+    -> );
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> 
+mysql> CREATE TABLE Depositor (
+    ->     customer_id VARCHAR(10),
+    ->     account_number VARCHAR(10),
+    ->     PRIMARY KEY (customer_id, account_number),
+    ->     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
+    ->     FOREIGN KEY (account_number) REFERENCES Account(account_number)
+    -> );
+Query OK, 0 rows affected (0.22 sec)
+
+mysql> 
+mysql> CREATE TABLE Borrower (
+    ->     customer_id VARCHAR(10),
+    ->     loan_number VARCHAR(10),
+    ->     PRIMARY KEY (customer_id, loan_number),
+    ->     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
+    ->     FOREIGN KEY (loan_number) REFERENCES Loan(loan_number)
+    -> );
+Query OK, 0 rows affected (0.15 sec)
+
+mysql> 
+mysql> INSERT INTO Branch (branch_name, branch_city, assets) VALUES
+    -> ('HDFC', 'Pune', 2500000),
+    -> ('ICICI', 'Mumbai', 1800000),
+    -> ('XYZ', 'Delhi', 3200000),
+    -> ('SBI', 'Pune', 4000000);
+Query OK, 4 rows affected (0.01 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> INSERT INTO Customer (customer_id, customer_name, customer_street, customer_city) VALUES
+    -> ('C01', 'Anil', 'MG Road', 'Pune'),
+    -> ('C02', 'Sunita', 'FC Road', 'Pune'),
+    -> ('C03', 'Raj', 'Connaught Place', 'Delhi'),
+    -> ('C04', 'Priya', 'Link Road', 'Mumbai'),
+    -> ('C05', 'Kavita', 'Nehru Place', 'Delhi'),
+    -> ('C06', 'Vijay', 'JM Road', 'Pune'),
+    -> ('C07', 'Meera', 'LBS Marg', 'Pune'),
+    -> ('C08', 'Amit', 'Karol Bagh', 'Delhi');
+Query OK, 8 rows affected (0.01 sec)
+Records: 8  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> INSERT INTO Account (account_number, branch_name, balance) VALUES
+    -> ('A01', 'HDFC', 60000),
+    -> ('A02', 'SBI', 80000),
+    -> ('A03', 'XYZ', 95000),
+    -> ('A04', 'XYZ', 75000),
+    -> ('A05', 'HDFC', 120000),
+    -> ('A06', 'XYZ', 40000);
+Query OK, 6 rows affected (0.01 sec)
+Records: 6  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> INSERT INTO Loan (loan_number, branch_name, amount) VALUES
+    -> ('L01', 'HDFC', 30000),
+    -> ('L02', 'ICICI', 25000),
+    -> ('L03', 'SBI', 50000),
+    -> ('L04', 'HDFC', 90000),
+    -> ('L05', 'HDFC', 15000);
+Query OK, 5 rows affected (0.02 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> INSERT INTO Depositor (customer_id, account_number) VALUES
+    -> ('C01', 'A01'),
+    -> ('C02', 'A02'),
+    -> ('C03', 'A03'),
+    -> ('C08', 'A04'),
+    -> ('C07', 'A05'),
+    -> ('C05', 'A06');
+Query OK, 6 rows affected (0.02 sec)
+Records: 6  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> INSERT INTO Borrower (customer_id, loan_number) VALUES
+    -> ('C01', 'L01'),
+    -> ('C01', 'L02'),
+    -> ('C02', 'L03'),
+    -> ('C04', 'L04'),
+    -> ('C06', 'L05');
+Query OK, 5 rows affected (0.01 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> SELECT c.*
+    -> FROM Customer c
+    -> JOIN Borrower b ON c.customer_id = b.customer_id
+    -> JOIN Loan l ON b.loan_number = l.loan_number
+    -> WHERE l.branch_name IN ('HDFC', 'ICICI')
+    -> GROUP BY c.customer_id, c.customer_name, c.customer_street, c.customer_city
+    -> HAVING COUNT(DISTINCT l.branch_name) = 2;
++-------------+---------------+-----------------+---------------+
+| customer_id | customer_name | customer_street | customer_city |
++-------------+---------------+-----------------+---------------+
+| C01         | Anil          | MG Road         | Pune          |
++-------------+---------------+-----------------+---------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT DISTINCT c.*
+    -> FROM Customer c
+    -> JOIN Depositor d ON c.customer_id = d.customer_id
+    -> JOIN Account a ON d.account_number = a.account_number
+    -> JOIN Borrower b ON c.customer_id = b.customer_id
+    -> JOIN Loan l ON b.loan_number = l.loan_number
+    -> WHERE a.branch_name = l.branch_name;
++-------------+---------------+-----------------+---------------+
+| customer_id | customer_name | customer_street | customer_city |
++-------------+---------------+-----------------+---------------+
+| C01         | Anil          | MG Road         | Pune          |
+| C02         | Sunita        | FC Road         | Pune          |
++-------------+---------------+-----------------+---------------+
+2 rows in set (0.00 sec)
+
+mysql> SELECT a.branch_name, COUNT(DISTINCT d.customer_id) AS number_of_depositors
+    -> FROM Account a
+    -> JOIN Depositor d ON a.account_number = d.account_number
+    -> GROUP BY a.branch_name;
++-------------+----------------------+
+| branch_name | number_of_depositors |
++-------------+----------------------+
+| HDFC        |                    2 |
+| SBI         |                    1 |
+| XYZ         |                    3 |
++-------------+----------------------+
+3 rows in set (0.00 sec)
+
+mysql> SELECT c.*, l.amount AS loan_amount
+    -> FROM Customer c
+    -> JOIN Borrower b ON c.customer_id = b.customer_id
+    -> JOIN Loan l ON b.loan_number = l.loan_number
+    -> WHERE l.amount > (SELECT AVG(balance) FROM Account WHERE branch_name = 'XYZ');
++-------------+---------------+-----------------+---------------+-------------+
+| customer_id | customer_name | customer_street | customer_city | loan_amount |
++-------------+---------------+-----------------+---------------+-------------+
+| C04         | Priya         | Link Road       | Mumbai        |    90000.00 |
++-------------+---------------+-----------------+---------------+-------------+
+1 row in set (0.00 sec)
+
+mysql> WITH RankedBalances AS (
+    ->     SELECT
+    ->         c.customer_name,
+    ->         a.branch_name,
+    ->         a.balance,
+    ->         RANK() OVER(PARTITION BY a.branch_name ORDER BY a.balance DESC) as rnk
+    ->     FROM Customer c
+    ->     JOIN Depositor d ON c.customer_id = d.customer_id
+    ->     JOIN Account a ON d.account_number = a.account_number
+    -> )
+    -> SELECT customer_name, branch_name, balance
+    -> FROM RankedBalances
+    -> WHERE rnk = 1;
++---------------+-------------+-----------+
+| customer_name | branch_name | balance   |
++---------------+-------------+-----------+
+| Meera         | HDFC        | 120000.00 |
+| Sunita        | SBI         |  80000.00 |
+| Raj           | XYZ         |  95000.00 |
++---------------+-------------+-----------+
+3 rows in set (0.00 sec)
+
+mysql> SELECT T1.customer_id, T1.customer_name
+    -> FROM
+    ->     (SELECT DISTINCT c.customer_id, c.customer_name FROM Customer c JOIN Depositor d ON c.customer_id = d.customer_id) AS T1
+    -> NATURAL JOIN
+    ->     (SELECT DISTINCT c.customer_id, c.customer_name FROM Customer c JOIN Borrower b ON c.customer_id = b.customer_id) AS T2;
++-------------+---------------+
+| customer_id | customer_name |
++-------------+---------------+
+| C01         | Anil          |
+| C02         | Sunita        |
++-------------+---------------+
+2 rows in set (0.00 sec)
+
+mysql> SELECT D.customer_name AS depositor, B.customer_name AS borrower
+    -> FROM
+    ->     (SELECT DISTINCT c.customer_name FROM Customer c JOIN Depositor d ON c.customer_id = d.customer_id) AS D
+    -> CROSS JOIN
+    ->     (SELECT DISTINCT c.customer_name FROM Customer c JOIN Borrower b ON c.customer_id = b.customer_id) AS B;
++-----------+----------+
+| depositor | borrower |
++-----------+----------+
+| Anil      | Vijay    |
+| Anil      | Priya    |
+| Anil      | Sunita   |
+| Anil      | Anil     |
+| Sunita    | Vijay    |
+| Sunita    | Priya    |
+| Sunita    | Sunita   |
+| Sunita    | Anil     |
+| Raj       | Vijay    |
+| Raj       | Priya    |
+| Raj       | Sunita   |
+| Raj       | Anil     |
+| Amit      | Vijay    |
+| Amit      | Priya    |
+| Amit      | Sunita   |
+| Amit      | Anil     |
+| Meera     | Vijay    |
+| Meera     | Priya    |
+| Meera     | Sunita   |
+| Meera     | Anil     |
+| Kavita    | Vijay    |
+| Kavita    | Priya    |
+| Kavita    | Sunita   |
+| Kavita    | Anil     |
++-----------+----------+
+24 rows in set (0.00 sec)
+
+mysql> SELECT c.*
+    -> FROM Customer c
+    -> LEFT JOIN Borrower b ON c.customer_id = b.customer_id
+    -> WHERE b.customer_id IS NULL;
++-------------+---------------+-----------------+---------------+
+| customer_id | customer_name | customer_street | customer_city |
++-------------+---------------+-----------------+---------------+
+| C03         | Raj           | Connaught Place | Delhi         |
+| C05         | Kavita        | Nehru Place     | Delhi         |
+| C07         | Meera         | LBS Marg        | Pune          |
+| C08         | Amit          | Karol Bagh      | Delhi         |
++-------------+---------------+-----------------+---------------+
+4 rows in set (0.00 sec)
+
+mysql> SELECT DISTINCT c.*
+    -> FROM Customer c
+    -> RIGHT JOIN Borrower b ON c.customer_id = b.customer_id;
++-------------+---------------+-----------------+---------------+
+| customer_id | customer_name | customer_street | customer_city |
++-------------+---------------+-----------------+---------------+
+| C01         | Anil          | MG Road         | Pune          |
+| C02         | Sunita        | FC Road         | Pune          |
+| C04         | Priya         | Link Road       | Mumbai        |
+| C06         | Vijay         | JM Road         | Pune          |
++-------------+---------------+-----------------+---------------+
+4 rows in set (0.00 sec)
+
+mysql> WITH CustomerDeposits AS (
+    ->     SELECT DISTINCT customer_id FROM Depositor
+    -> ),
+    -> CustomerBorrows AS (
+    ->     SELECT DISTINCT customer_id FROM Borrower
+    -> )
+    -> SELECT
+    ->     c.*
+    -> FROM Customer c
+    -> JOIN CustomerDeposits cd ON c.customer_id = cd.customer_id
+    -> JOIN CustomerBorrows cb ON c.customer_id = cb.customer_id
+    -> WHERE c.customer_id IN (
+    ->     SELECT customer_id FROM CustomerDeposits
+    ->     LEFT JOIN CustomerBorrows USING(customer_id)
+    ->     UNION
+    ->     SELECT customer_id FROM CustomerDeposits
+    ->     RIGHT JOIN CustomerBorrows USING(customer_id)
+    -> );
++-------------+---------------+-----------------+---------------+
+| customer_id | customer_name | customer_street | customer_city |
++-------------+---------------+-----------------+---------------+
+| C01         | Anil          | MG Road         | Pune          |
+| C02         | Sunita        | FC Road         | Pune          |
++-------------+---------------+-----------------+---------------+
+2 rows in set (0.00 sec)
+
+mysql> exit

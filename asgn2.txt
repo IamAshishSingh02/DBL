@@ -1,0 +1,543 @@
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| Bank               |
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+5 rows in set (0.00 sec)
+
+mysql> use Bank;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> DROP TABLE IF EXISTS Depositor;
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> DROP TABLE IF EXISTS Borrower;
+Query OK, 0 rows affected (0.05 sec)
+
+mysql> DROP TABLE IF EXISTS Account;
+Query OK, 0 rows affected (0.06 sec)
+
+mysql> DROP TABLE IF EXISTS Loan;
+Query OK, 0 rows affected (0.06 sec)
+
+mysql> DROP TABLE IF EXISTS Customer;
+Query OK, 0 rows affected (0.06 sec)
+
+mysql> DROP TABLE IF EXISTS Branch;
+Query OK, 0 rows affected (0.10 sec)
+
+mysql> 
+mysql> CREATE TABLE Branch (
+    ->     branch_name VARCHAR(50) PRIMARY KEY,
+    ->     branch_city VARCHAR(50) NOT NULL,
+    ->     assets DECIMAL(15, 2) NOT NULL CHECK (assets >= 0)
+    -> );
+Query OK, 0 rows affected (0.08 sec)
+
+mysql> 
+mysql> CREATE TABLE Customer (
+    ->     c_id VARCHAR(10) PRIMARY KEY,
+    ->     cname VARCHAR(50) NOT NULL,
+    ->     street VARCHAR(100),
+    ->     city VARCHAR(50) NOT NULL
+    -> );
+Query OK, 0 rows affected (0.09 sec)
+
+mysql> 
+mysql> CREATE TABLE Loan (
+    ->     loan_no VARCHAR(10) PRIMARY KEY,
+    ->     branch_name VARCHAR(50),
+    ->     amount DECIMAL(12, 2) NOT NULL CHECK (amount > 0),
+    ->     FOREIGN KEY (branch_name) REFERENCES Branch(branch_name) ON DELETE SET NULL
+    -> );
+Query OK, 0 rows affected (0.14 sec)
+
+mysql> 
+mysql> CREATE TABLE Borrower (
+    ->     c_id VARCHAR(10),
+    ->     loan_no VARCHAR(10),
+    ->     PRIMARY KEY (c_id, loan_no),
+    ->     FOREIGN KEY (c_id) REFERENCES Customer(c_id) ON DELETE CASCADE,
+    ->     FOREIGN KEY (loan_no) REFERENCES Loan(loan_no) ON DELETE CASCADE
+    -> );
+Query OK, 0 rows affected (0.12 sec)
+
+mysql> 
+mysql> CREATE TABLE Account (
+    ->     account_no VARCHAR(10) PRIMARY KEY,
+    ->     branch_name VARCHAR(50),
+    ->     balance DECIMAL(12, 2) NOT NULL CHECK (balance >= 0),
+    ->     FOREIGN KEY (branch_name) REFERENCES Branch(branch_name) ON DELETE SET NULL
+    -> );
+Query OK, 0 rows affected (0.11 sec)
+
+mysql> 
+mysql> CREATE TABLE Depositor (
+    ->     c_id VARCHAR(10),
+    ->     account_no VARCHAR(10),
+    ->     PRIMARY KEY (c_id, account_no),
+    ->     FOREIGN KEY (c_id) REFERENCES Customer(c_id) ON DELETE CASCADE,
+    ->     FOREIGN KEY (account_no) REFERENCES Account(account_no) ON DELETE CASCADE
+    -> );
+Query OK, 0 rows affected (0.19 sec)
+
+mysql> 
+mysql> INSERT INTO Branch (branch_name, branch_city, assets) VALUES
+    -> ('FC-Road-Pune', 'Pune', 75000000.00),
+    -> ('Koregaon-Park', 'Pune', 120000000.00),
+    -> ('Andheri-West', 'Mumbai', 250000000.00),
+    -> ('Civil-Lines-Nagpur', 'Nagpur', 60000000.00);
+Query OK, 4 rows affected (0.03 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> INSERT INTO Customer (c_id, cname, street, city) VALUES
+    -> ('C001', 'Priya Sharma', 'JM Road', 'Pune'),
+    -> ('C002', 'Rohan Deshpande', 'Law College Road', 'Pune'),
+    -> ('C003', 'Aisha Khan', 'Carter Road', 'Mumbai'),
+    -> ('C004', 'Vikram Singh', 'Palm Beach Marg', 'Mumbai'),
+    -> ('C005', 'Sneha Patil', 'Sitabuldi', 'Nagpur'),
+    -> ('C006', 'Arjun Reddy', 'North Main Road', 'Pune'),
+    -> ('C007', 'Meera Iyer', 'Bandra West', 'Mumbai'),
+    -> ('C008', 'Aditya Joshi', 'Deccan Gymkhana', 'Pune'),
+    -> ('C009', 'Kavita Rao', 'Ramdaspeth', 'Nagpur'),
+    -> ('C010', 'Sameer Gupta', 'Aundh', 'Pune'),
+    -> ('C011', 'Nisha Agarwal', 'Vashi', 'Mumbai'),
+    -> ('C012', 'Imran Shaikh', 'Camp', 'Pune');
+Query OK, 12 rows affected (0.03 sec)
+Records: 12  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> INSERT INTO Account (account_no, branch_name, balance) VALUES
+    -> ('A101', 'FC-Road-Pune', 85000.00),
+    -> ('A102', 'Koregaon-Park', 150000.00),
+    -> ('A103', 'Andheri-West', 225000.00),
+    -> ('A104', 'Civil-Lines-Nagpur', 45000.00),
+    -> ('A105', 'Koregaon-Park', 550000.00),
+    -> ('A106', 'Andheri-West', 35000.00),
+    -> ('A107', 'FC-Road-Pune', 12000.00),
+    -> ('A108', 'Koregaon-Park', 980000.00),
+    -> ('A109', 'Andheri-West', 125000.00),
+    -> ('A110', 'FC-Road-Pune', 40000.00);
+Query OK, 10 rows affected (0.02 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> INSERT INTO Loan (loan_no, branch_name, amount) VALUES
+    -> ('L501', 'Koregaon-Park', 500000.00),
+    -> ('L502', 'Andheri-West', 1200000.00),
+    -> ('L503', 'FC-Road-Pune', 75000.00),
+    -> ('L504', 'Civil-Lines-Nagpur', 250000.00),
+    -> ('L505', 'Koregaon-Park', 800000.00),
+    -> ('L506', 'Andheri-West', 45000.00);
+Query OK, 6 rows affected (0.01 sec)
+Records: 6  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> INSERT INTO Depositor (c_id, account_no) VALUES
+    -> ('C001', 'A101'),
+    -> ('C002', 'A107'),
+    -> ('C003', 'A103'),
+    -> ('C005', 'A104'),
+    -> ('C006', 'A102'),
+    -> ('C006', 'A105'),
+    -> ('C007', 'A106'),
+    -> ('C008', 'A108'),
+    -> ('C011', 'A109'),
+    -> ('C012', 'A110');
+Query OK, 10 rows affected (0.02 sec)
+Records: 10  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> INSERT INTO Borrower (c_id, loan_no) VALUES
+    -> ('C002', 'L503'),
+    -> ('C003', 'L506'),
+    -> ('C004', 'L502'),
+    -> ('C006', 'L501'),
+    -> ('C009', 'L504'),
+    -> ('C010', 'L505');
+Query OK, 6 rows affected (0.02 sec)
+Records: 6  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> ALTER TABLE Customer ADD COLUMN phone_no VARCHAR(15) UNIQUE;
+Query OK, 0 rows affected (0.34 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE Branch MODIFY assets DECIMAL(18, 2);
+Query OK, 4 rows affected (0.23 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE Customer DROP COLUMN phone_no;
+Query OK, 0 rows affected (0.20 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> CREATE VIEW Pune_Branch_Customers AS
+    -> SELECT c.c_id, c.cname, c.city, a.account_no, a.balance
+    -> FROM Customer c
+    -> JOIN Depositor d ON c.c_id = d.c_id
+    -> JOIN Account a ON d.account_no = a.account_no
+    -> WHERE a.branch_name = 'Pune';
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> 
+mysql> CREATE OR REPLACE VIEW Pune_Branch_Customers AS
+    -> SELECT c.c_id, c.cname, c.city, a.account_no, a.balance
+    -> FROM Customer c
+    -> JOIN Depositor d ON c.c_id = d.c_id
+    -> JOIN Account a ON d.account_no = a.account_no
+    -> WHERE a.branch_name = 'Pune' AND a.balance > 20000;
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> 
+mysql> RENAME VIEW Pune_Branch_Customers TO Pune_High_Balance_Customers;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'VIEW Pune_Branch_Customers TO Pune_High_Balance_Customers' at line 1
+mysql> 
+mysql> CREATE OR REPLACE VIEW All_Customers_View AS
+    -> SELECT c_id, cname, street, city FROM Customer;
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> 
+mysql> INSERT INTO All_Customers_View (c_id, cname, city) VALUES ('C013', 'Bruce Wayne', 'Gotham');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> UPDATE All_Customers_View SET city = 'Pune' WHERE cname = 'Bruce Wayne';
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> DELETE FROM All_Customers_View WHERE cname = 'Bruce Wayne';
+Query OK, 1 row affected (0.01 sec)
+
+mysql> 
+mysql> CREATE INDEX idx_customer_name ON Customer (cname);
+Query OK, 0 rows affected (0.08 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> CREATE INDEX idx_depositor_link ON Depositor (c_id, account_no);
+Query OK, 0 rows affected (0.07 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> DROP INDEX idx_customer_name ON Customer;
+Query OK, 0 rows affected (0.03 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> 
+mysql> CREATE SEQUENCE customer_id_seq START WITH 100 INCREMENT BY 1;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SEQUENCE customer_id_seq START WITH 100 INCREMENT BY 1' at line 1
+mysql> DROP SEQUENCE IF EXISTS customer_id_seq;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'SEQUENCE IF EXISTS customer_id_seq' at line 1
+mysql> -- First, drop the existing table if you need to redefine it
+mysql> DROP TABLE IF EXISTS Customer;
+ERROR 3730 (HY000): Cannot drop table 'Customer' referenced by a foreign key constraint 'Borrower_ibfk_1' on table 'Borrower'.
+mysql> 
+mysql> -- Correctly create the table with an auto-incrementing integer key
+mysql> CREATE TABLE Customer (
+    ->     c_id INT PRIMARY KEY AUTO_INCREMENT,
+    ->     cname VARCHAR(50) NOT NULL,
+    ->     street VARCHAR(100),
+    ->     city VARCHAR(50) NOT NULL
+    -> );
+ERROR 1050 (42S01): Table 'Customer' already exists
+mysql> -- 1
+mysql> INSERT INTO Branch (branch_name, branch_city, assets) VALUES ('Main-Satara', 'Satara', 45000000);
+Query OK, 1 row affected (0.02 sec)
+
+mysql> INSERT INTO Customer (c_id, cname, street, city) VALUES ('C014', 'Raj Malhotra', 'Rajpath', 'Satara');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> INSERT INTO Account (account_no, branch_name, balance) VALUES ('A111', 'Main-Satara', 60000);
+Query OK, 1 row affected (0.01 sec)
+
+mysql> INSERT INTO Depositor (c_id, account_no) VALUES ('C014', 'A111');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> 
+mysql> -- 2
+mysql> INSERT INTO Customer (c_id, cname, city) VALUES ('C015', 'Simran Singh', 'Delhi');
+Query OK, 1 row affected (0.01 sec)
+
+mysql> 
+mysql> -- 3
+mysql> SELECT * FROM Branch;
++--------------------+-------------+--------------+
+| branch_name        | branch_city | assets       |
++--------------------+-------------+--------------+
+| Andheri-West       | Mumbai      | 250000000.00 |
+| Civil-Lines-Nagpur | Nagpur      |  60000000.00 |
+| FC-Road-Pune       | Pune        |  75000000.00 |
+| Koregaon-Park      | Pune        | 120000000.00 |
+| Main-Satara        | Satara      |  45000000.00 |
++--------------------+-------------+--------------+
+5 rows in set (0.00 sec)
+
+mysql> SELECT * FROM Account;
++------------+--------------------+-----------+
+| account_no | branch_name        | balance   |
++------------+--------------------+-----------+
+| A101       | FC-Road-Pune       |  85000.00 |
+| A102       | Koregaon-Park      | 150000.00 |
+| A103       | Andheri-West       | 225000.00 |
+| A104       | Civil-Lines-Nagpur |  45000.00 |
+| A105       | Koregaon-Park      | 550000.00 |
+| A106       | Andheri-West       |  35000.00 |
+| A107       | FC-Road-Pune       |  12000.00 |
+| A108       | Koregaon-Park      | 980000.00 |
+| A109       | Andheri-West       | 125000.00 |
+| A110       | FC-Road-Pune       |  40000.00 |
+| A111       | Main-Satara        |  60000.00 |
++------------+--------------------+-----------+
+11 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- 4
+mysql> SELECT c_id, cname FROM Customer;
++------+-----------------+
+| c_id | cname           |
++------+-----------------+
+| C001 | Priya Sharma    |
+| C002 | Rohan Deshpande |
+| C003 | Aisha Khan      |
+| C004 | Vikram Singh    |
+| C005 | Sneha Patil     |
+| C006 | Arjun Reddy     |
+| C007 | Meera Iyer      |
+| C008 | Aditya Joshi    |
+| C009 | Kavita Rao      |
+| C010 | Sameer Gupta    |
+| C011 | Nisha Agarwal   |
+| C012 | Imran Shaikh    |
+| C014 | Raj Malhotra    |
+| C015 | Simran Singh    |
++------+-----------------+
+14 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- 5
+mysql> SELECT c.cname
+    -> FROM Customer c
+    -> JOIN Borrower b ON c.c_id = b.c_id
+    -> JOIN Loan l ON b.loan_no = l.loan_no
+    -> JOIN Branch br ON l.branch_name = br.branch_name
+    -> WHERE br.branch_city = 'Mumbai';
++--------------+
+| cname        |
++--------------+
+| Vikram Singh |
+| Aisha Khan   |
++--------------+
+2 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- 6
+mysql> SELECT DISTINCT c_id FROM Depositor;
++------+
+| c_id |
++------+
+| C001 |
+| C002 |
+| C003 |
+| C005 |
+| C006 |
+| C007 |
+| C008 |
+| C011 |
+| C012 |
+| C014 |
++------+
+10 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- 7
+mysql> UPDATE Branch SET branch_city = 'Nagpur' WHERE branch_name = 'Civil-Lines-Nagpur';
+Query OK, 0 rows affected (0.00 sec)
+Rows matched: 1  Changed: 0  Warnings: 0
+
+mysql> 
+mysql> -- 8
+mysql> UPDATE Loan
+    -> SET amount = amount + 100000
+    -> WHERE loan_no IN (SELECT loan_no FROM Borrower WHERE c_id = 'C002');
+Query OK, 1 row affected (0.01 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> 
+mysql> -- 9
+mysql> DELETE FROM Depositor
+    -> WHERE account_no IN (SELECT account_no FROM Account WHERE balance BETWEEN 30000 AND 80000);
+Query OK, 4 rows affected (0.01 sec)
+
+mysql> 
+mysql> -- 10
+mysql> SELECT cname FROM Customer WHERE cname LIKE 'R%';
++-----------------+
+| cname           |
++-----------------+
+| Rohan Deshpande |
+| Raj Malhotra    |
++-----------------+
+2 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- 11
+mysql> SELECT DISTINCT c.*
+    -> FROM Customer c
+    -> JOIN Borrower b ON c.c_id = b.c_id
+    -> JOIN Loan l ON b.loan_no = l.loan_no
+    -> WHERE l.branch_name IN ('FC-Road-Pune', 'Koregaon-Park', 'Andheri-West');
++------+-----------------+------------------+--------+
+| c_id | cname           | street           | city   |
++------+-----------------+------------------+--------+
+| C006 | Arjun Reddy     | North Main Road  | Pune   |
+| C004 | Vikram Singh    | Palm Beach Marg  | Mumbai |
+| C002 | Rohan Deshpande | Law College Road | Pune   |
+| C010 | Sameer Gupta    | Aundh            | Pune   |
+| C003 | Aisha Khan      | Carter Road      | Mumbai |
++------+-----------------+------------------+--------+
+5 rows in set (0.01 sec)
+
+mysql> 
+mysql> -- 12
+mysql> SELECT AVG(balance) AS average_balance FROM Account WHERE branch_name = 'Koregaon-Park';
++-----------------+
+| average_balance |
++-----------------+
+|   560000.000000 |
++-----------------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- 13
+mysql> SELECT COUNT(DISTINCT d.c_id) AS total_customers
+    -> FROM Depositor d
+    -> JOIN Account a ON d.account_no = a.account_no
+    -> WHERE a.branch_name = 'Andheri-West';
++-----------------+
+| total_customers |
++-----------------+
+|               2 |
++-----------------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- 14
+mysql> SELECT MAX(amount) AS max_loan, MIN(amount) AS min_loan FROM Loan WHERE branch_name = 'Koregaon-Park';
++-----------+-----------+
+| max_loan  | min_loan  |
++-----------+-----------+
+| 800000.00 | 500000.00 |
++-----------+-----------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- 15
+mysql> SELECT SUM(balance) AS total_balance FROM Account WHERE branch_name = 'FC-Road-Pune';
++---------------+
+| total_balance |
++---------------+
+|     137000.00 |
++---------------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- 16
+mysql> SELECT * FROM Customer ORDER BY cname ASC, city DESC;
++------+-----------------+------------------+--------+
+| c_id | cname           | street           | city   |
++------+-----------------+------------------+--------+
+| C008 | Aditya Joshi    | Deccan Gymkhana  | Pune   |
+| C003 | Aisha Khan      | Carter Road      | Mumbai |
+| C006 | Arjun Reddy     | North Main Road  | Pune   |
+| C012 | Imran Shaikh    | Camp             | Pune   |
+| C009 | Kavita Rao      | Ramdaspeth       | Nagpur |
+| C007 | Meera Iyer      | Bandra West      | Mumbai |
+| C011 | Nisha Agarwal   | Vashi            | Mumbai |
+| C001 | Priya Sharma    | JM Road          | Pune   |
+| C014 | Raj Malhotra    | Rajpath          | Satara |
+| C002 | Rohan Deshpande | Law College Road | Pune   |
+| C010 | Sameer Gupta    | Aundh            | Pune   |
+| C015 | Simran Singh    | NULL             | Delhi  |
+| C005 | Sneha Patil     | Sitabuldi        | Nagpur |
+| C004 | Vikram Singh    | Palm Beach Marg  | Mumbai |
++------+-----------------+------------------+--------+
+14 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- 17
+mysql> SELECT c.cname
+    -> FROM Customer c JOIN Depositor d ON c.c_id = d.c_id JOIN Account a ON d.account_no = a.account_no
+    -> WHERE a.branch_name = 'FC-Road-Pune'
+    -> UNION
+    -> SELECT c.cname
+    -> FROM Customer c JOIN Depositor d ON c.c_id = d.c_id JOIN Account a ON d.account_no = a.account_no
+    -> WHERE a.branch_name = 'Koregaon-Park';
++-----------------+
+| cname           |
++-----------------+
+| Priya Sharma    |
+| Rohan Deshpande |
+| Arjun Reddy     |
+| Aditya Joshi    |
++-----------------+
+4 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- 18
+mysql> SELECT c.cname
+    -> FROM Customer c JOIN Depositor d ON c.c_id = d.c_id JOIN Account a ON d.account_no = a.account_no
+    -> WHERE a.branch_name = 'FC-Road-Pune'
+    -> UNION ALL
+    -> SELECT c.cname
+    -> FROM Customer c JOIN Depositor d ON c.c_id = d.c_id JOIN Account a ON d.account_no = a.account_no
+    -> WHERE a.branch_name = 'Koregaon-Park';
++-----------------+
+| cname           |
++-----------------+
+| Priya Sharma    |
+| Rohan Deshpande |
+| Arjun Reddy     |
+| Arjun Reddy     |
+| Aditya Joshi    |
++-----------------+
+5 rows in set (0.00 sec)
+
+mysql> 
+mysql> -- 19
+mysql> SELECT c.*
+    -> FROM Customer c
+    -> WHERE
+    ->     c.c_id IN (SELECT b.c_id FROM Borrower b JOIN Loan l ON b.loan_no = l.loan_no WHERE l.branch_name = 'Koregaon-Park')
+    -> AND
+    ->     c.c_id NOT IN (SELECT d.c_id FROM Depositor d JOIN Account a ON d.account_no = a.account_no WHERE a.branch_name = 'Koregaon-Park');
++------+--------------+--------+------+
+| c_id | cname        | street | city |
++------+--------------+--------+------+
+| C010 | Sameer Gupta | Aundh  | Pune |
++------+--------------+--------+------+
+1 row in set (0.00 sec)
+
+mysql> 
+mysql> -- 20
+mysql> SELECT c.*
+    -> FROM Customer c
+    -> WHERE
+    ->     c.c_id IN (SELECT d.c_id FROM Depositor d JOIN Account a ON d.account_no = a.account_no WHERE a.branch_name = 'Andheri-West')
+    -> AND
+    ->     c.c_id NOT IN (SELECT b.c_id FROM Borrower b);
++------+---------------+--------+--------+
+| c_id | cname         | street | city   |
++------+---------------+--------+--------+
+| C011 | Nisha Agarwal | Vashi  | Mumbai |
++------+---------------+--------+--------+
+1 row in set (0.00 sec)
+
+mysql> no tee
+    -> ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'no tee' at line 1
+mysql> notee;
