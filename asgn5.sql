@@ -15,10 +15,12 @@ create table result (
 
 delimiter $$
 
+-- procedure for grading
 create procedure proc_grade(in p_roll int, in p_name varchar(30), in p_marks int)
 begin
     declare v_class varchar(30);
 
+    -- error handler
     declare exit handler for sqlexception
     begin
         select 'error occurred while processing proc_grade' as message;
@@ -35,9 +37,11 @@ begin
         set v_class = 'fail';
     end if;
 
+    insert into stud_marks (roll, name, total_marks) values (p_roll, p_name, p_marks);
     insert into result (roll, name, class) values (p_roll, p_name, v_class);
 end$$
 
+-- function for grading
 create function func_grade(p_marks int) returns varchar(30)
 deterministic
 begin
@@ -58,9 +62,10 @@ end$$
 
 delimiter ;
 
-call proc_grade(1, 'ashish', 1200);
-call proc_grade(2, 'ashu', 950);
+call proc_grade(1, 'Ashish', 1200);
+call proc_grade(2, 'Ashu', 950);
 call proc_grade(3, 'random1', 860);
 call proc_grade(4, 'random2', 700);
 
+select * from stud_marks;
 select * from result;
