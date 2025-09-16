@@ -27,15 +27,7 @@ begin
         rollback;
     end;
 
-    if p_marks between 990 and 1500 then
-        set v_class = 'distinction';
-    elseif p_marks between 900 and 989 then
-        set v_class = 'first class';
-    elseif p_marks between 825 and 899 then
-        set v_class = 'higher second class';
-    else
-        set v_class = 'fail';
-    end if;
+    set v_class = func_grade(p_marks);
 
     insert into stud_marks (roll, name, total_marks) values (p_roll, p_name, p_marks);
     insert into result (roll, name, class) values (p_roll, p_name, v_class);
